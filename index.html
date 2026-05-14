@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>宜蘭漁港水質監測系統</title>
+
+<script type="text/javascript" 
+    src="https://api.tgos.tw/TGOS_API/tgos?ver=2&AppID=x+JLVSx85Lk=&APIKey=in8W74q0ogpcfW/STwicK8D5QwCdddJf05/7nb+OtDh8R99YN3T0LurV4xato3TpL/fOfylvJ9Wv/khZEsXEWxsBmg+GEj4AuokiNXCh14Rei21U5GtJpIkO++Mq3AguFK/ISDEWn4hMzqgrkxNe1Q==" 
+    charset="utf-8"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<style>
+/* ===== 基本版面 ===== */
+body { margin:0; font-family:"Microsoft JhengHei", sans-serif; display:flex; height:100vh; width:100vw; overflow:hidden; }
+#MapDiv { flex:1; height:100%; }
+#controlPanel {
+    width:420px;
+    height:100%;
+    background:#fff;
+    padding:20px;
+    box-sizing:border-box;
+    overflow-y:auto;
+    border-left:1px solid #ccc;
+}
+
+/* ===== 標題 ===== */
+h3 { color:#1a73e8; border-bottom:2px solid #1a73e8; padding-bottom:8px; margin-top:0; }
+h4 { color:#333; margin:0 0 8px 0; font-size:14px; }
+
+/* ===== 分頁 Tab ===== */
+.tab-bar { display:flex; border-bottom:2px solid #1a73e8; margin-bottom:16px; }
+.tab-btn {
+    flex:1; padding:8px; border:none; background:#f0f4ff;
+    cursor:pointer; font-size:14px; font-family:"Microsoft JhengHei", sans-serif;
+    border-radius:6px 6px 0 0; color:#555;
+}
+.tab-btn.active { background:#1a73e8; color:#fff; font-weight:bold; }
+
+.tab-content { display:none; }
+.tab-content.active { display:block; }
+
+/* ===== 表單元素 ===== */
+.row { margin-bottom:14px; }
+select, button { width:100%; padding:8px; font-size:14px; margin-top:4px; box-sizing:border-box; }
+label { font-weight:bold; display:block; font-size:13px; }
+
+/* ===== 比較圖港口選擇 ===== */
+.port-compare-select { display:flex; gap:8px; }
+.port-compare-select select { flex:1; }
+
+/* ===== 按鈕樣式 ===== */
+.btn-primary {
+    background:#1a73e8; color:#fff; border:none;
+    padding:10px; border-radius:6px; cursor:pointer;
+    font-size:14px; font-family:"Microsoft JhengHei", sans-serif;
+    margin-top:6px;
+}
+.btn-primary:hover { background:#1558b0; }
+.btn-report {
+    background:#34a853; color:#fff; border:none;
+    padding:10px; border-radius:6px; cursor:pointer;
+    font-size:14px; font-family:"Microsoft JhengHei", sans-serif;
+    margin-top:6px; width:100%;
+}
+.btn-report:hover { background:#2d8f47; }
+
+/* ===== 圖表容器 ===== */
+.chart-container { position:relative; height:280px; width:100%; margin-bottom:16px; }
+
+/* ===== 資訊列 ===== */
+.info-bar { background:#f8f9fa; border-radius:6px; padding:8px 12px; font-size:13px; margin-bottom:10px; }
+
+/* ===== 異常警示標籤 ===== */
+.badge-ok   { background:#34a853; color:#fff; border-radius:4px; padding:2px 7px; font-size:12px; }
+.badge-warn { background:#fbbc04; color:#333; border-radius:4px; padding:2px 7px; font-size:12px; }
+.badge-bad  { background:#ea4335; color:#fff; border-radius:4px; padding:2px 7px; font-size:12px; }
+
+/* ===== 列印樣式 ===== */
+@media print {
+    body { display:block; overflow:visible; }
+    #MapDiv { display:none !important; }
+    #controlPanel {
+        width:100% !important;
+        height:auto !important;
+        border:none !important;
+        overflow:visible !important;
+    }
+    .tab-bar { display:none !important; }
+    .tab-content { display:block !important; }
+    .btn-primary, .btn-report, .no-print { display:none !important; }
+    .chart-container { height:220px !important; page-break-inside:avoid; }
+    .report-section { page-break-inside:avoid; }
+}
+</style>
+</head>
+
+<body onload="InitAll();">
+<div id="MapDiv"></div>
+
+<div id="controlPanel">
+    <h3>🐟 宜蘭漁港水質監測系統</h3>
+
+    <!-- 分頁切換 -->
+    <div class="tab-bar no-print">
+        <button class="tab-btn active" onclick="switchTab('tab-single')">單一港口</button>
+        <button class="tab-btn"        onclick="switchTab('tab-compare')">多港口比較</button>
+        <button class="tab-btn"        onclick="switchTab('tab-report')">水質報告</button>
+    </div>
+
+    <!-- ===== Tab 1：單一港口 ===== -->
+    <div id="tab-single" class="tab-content active">
+        <div class="row">
+            <label>選擇監測漁港：</label>
+            <select id="portSelect" onchange="onFilterChange()">
+                <option value="">-- 請選擇漁港 --</option>
+            </select>
+        </div>
+        <div class="row">
+            <label>選擇檢測項目：</label>
+            <select id="typeSelect" onchange="onFilterChange()">
+                <option value="ph">pH（酸鹼值）</option>
+                <option value="do">DO（溶氧量, mg/L）</option>
+                <option value="EC">EC（導電度, mS/cm）</option>
+                <option value="salinity">鹽度（ppt）</option>
+            </select>
+        </div>
+        <div class="info-bar">目前顯示：<span id="currentInfo">請選擇漁港</span></div>
+        <div class="chart-container"><canvas id="mainChart"></canvas></div>
+    </div>
+
+    <!-- ===== Tab 2：多港口比較 ===== -->
+    <div id="tab-compare" class="tab-content">
+        <div class="row">
+            <label>選擇比較項目：</label>
+            <select id="compareType" onchange="updateCompareChart()">
+                <option value="ph">pH（酸鹼值）</option>
+                <option value="do">DO（溶氧量, mg/L）</option>
+                <option value="EC">EC（導電度, mS/cm）</option>
+                <option value="salinity">鹽度（ppt）</option>
+            </select>
+        </div>
+        <div class="row">
+            <label>選擇漁港 A：</label>
+            <select id="comparePortA" onchange="updateCompareChart()">
+                <option value="">-- 請選擇 --</option>
+            </select>
+        </div>
+        <div class="row">
+            <label>選擇漁港 B：</label>
+            <select id="comparePortB" onchange="updateCompareChart()">
+                <option value="">-- 請選擇 --</option>
+            </select>
+        </div>
+        <div class="info-bar" id="compareInfo">請選擇兩個漁港進行比較</div>
+        <div class="chart-container"><canvas id="compareChart"></canvas></div>
+    </div>
+
+    <!-- ===== Tab 3：水質報告 ===== -->
+    <div id="tab-report" class="tab-content">
+        <div class="row no-print">
+            <label>產生報告類型：</label>
+            <select id="reportType">
+                <option value="single">單一漁港報告</option>
+                <option value="all">所有已選漁港綜合報告</option>
+            </select>
+        </div>
+        <div class="row no-print" id="reportPortRow">
+            <label>選擇漁港：</label>
+            <select id="reportPortSelect">
+                <option value="">-- 請選擇漁港 --</option>
+            </select>
+        </div>
+        <button class="btn-report no-print" onclick="generateReport()">📋 產生報告</button>
+        <button class="btn-report no-print" style="background:#555;margin-top:6px;" onclick="window.print()">🖨️ 列印 / 另存 PDF</button>
+
+        <!-- 報告內容（列印時顯示） -->
+        <div id="reportContent" style="margin-top:16px;"></div>
+    </div>
+</div>
+
+<script>
+// ===================================================
+// 全域變數
+// ===================================================
+var map = null;
+var portDataMap = {};
+var markers = {};
+var mainChart = null;
+var compareChart = null;
+
+var portsCoords = {
+    "梗枋漁港":     { x: 337764.335, y: 2755398.563 },
+    "烏石港":       { x: 334224.121, y: 2750857.756 },
+    "大溪第一漁港": { x: 340745.390, y: 2759584.125 },
+    "大溪第二漁港": { x: 340813.356, y: 2759507.712 },
+    "蕃薯寮漁港":   { x: 342395.941, y: 2760783.203 },
+    "大里漁港":     { x: 343046.202, y: 2761926.005 },
+    "石城漁港":     { x: 346013.905, y: 2763893.910 },
+    "桶盤堀漁港":   { x: 344532.179, y: 2763169.322 },
+    "蘇澳港":       { x: 337596.057, y: 2720381.909 },
+    "南方澳第三漁港":{ x: 337721.962, y: 2719959.266 },
+    "南方澳第一漁港":{ x: 337866.597, y: 2719772.307 },
+    "南方澳第二漁港":{ x: 337940.522, y: 2719273.154 },
+    "粉鳥林漁港":   { x: 335482.954, y: 2710393.202 },
+    "朝陽漁港":     { x: 333150.115, y: 2706340.334 }
+};
+
+var weatherIcons = { "晴":"☀️", "陰":"☁️", "雨":"🌧️" };
+
+// 各指標正常範圍（用於異常判斷）
+var normalRanges = {
+    ph:       { min: 6.5, max: 8.5,  unit: "",       label: "pH 值" },
+    do:       { min: 4.0, max: 10.0, unit: " mg/L",  label: "溶氧量 (DO)" },
+    EC:       { min: 30,  max: 55,   unit: " mS/cm", label: "導電度 (EC)" },
+    salinity: { min: 20,  max: 40,   unit: " ppt",   label: "鹽度" }
+};
+
+var chartColors = ["#1a73e8", "#ea4335", "#34a853", "#fbbc04"];
+
+// ===================================================
+// 初始化
+// ===================================================
+function InitAll() {
+    fetch('water_quality.xlsx?t=' + Date.now())
+        .then(res => res.arrayBuffer())
+        .then(buffer => {
+            var workbook = XLSX.read(buffer, { type: 'array' });
+            workbook.SheetNames.forEach(function(sheetName) {
+                if (portsCoords[sheetName]) {
+                    portDataMap[sheetName] = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { raw: false });
+                }
+            });
+            updateAllDropdowns();
+            initMap();
+        })
+        .catch(err => {
+            console.error("Excel 讀取失敗", err);
+            alert("無法載入 water_quality.xlsx，請確認檔案是否存在。");
+        });
+}
+
+function updateAllDropdowns() {
+    var portNames = Object.keys(portsCoords).sort();
+
+    ['portSelect','comparePortA','comparePortB','reportPortSelect'].forEach(function(id) {
+        var sel = document.getElementById(id);
+        var firstOpt = sel.options[0].outerHTML;
+        sel.innerHTML = firstOpt;
+        portNames.forEach(name => {
+            var opt = document.createElement('option');
+            opt.value = name; opt.textContent = name;
+            sel.appendChild(opt);
+        });
+    });
+}
+
+// ===================================================
+// 地圖
+// ===================================================
+function initMap() {
+    var mapDiv = document.getElementById("MapDiv");
+    var startPt = new TGOS.TGPoint(337764.335, 2755398.563);
+    map = new TGOS.TGOnlineMap(mapDiv, TGOS.TGCoordSys.EPSG3826, {
+        zoom: 11,
+        navigationControl: true,
+        navigationControlOptions: {
+            controlPosition: TGOS.TGControlPosition.TOP_LEFT,
+            navigationControlStyle: TGOS.TGNavigationControlStyle.SMALL
+        }
+    });
+    map.setCenter(startPt);
+    createMarkers();
+}
+
+function createMarkers() {
+    var img = new TGOS.TGImage("https://api.tgos.tw/TGOS_API/images/marker2.png", new TGOS.TGSize(38,33));
+    Object.keys(portsCoords).forEach(name => {
+        var pt = new TGOS.TGPoint(portsCoords[name].x, portsCoords[name].y);
+        var mk = new TGOS.TGMarker(map, pt, name, img);
+        markers[name] = mk;
+        TGOS.TGEvent.addListener(mk, "click", function() {
+            document.getElementById('portSelect').value = name;
+            switchTab('tab-single');
+            onFilterChange();
+        });
+    });
+}
+
+function zoomToPort(portName) {
+    if (markers[portName]) {
+        var pos = markers[portName].getPosition();
+        map.setCenter(pos);
+        setTimeout(function() { map.setZoom(15); }, 100);
+    }
+}
+
+// ===================================================
+// Tab 切換
+// ===================================================
+function switchTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    var idx = ['tab-single','tab-compare','tab-report'].indexOf(tabId);
+    document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+}
+
+// ===================================================
+// Tab 1：單一港口
+// ===================================================
+function onFilterChange() {
+    var portName = document.getElementById('portSelect').value;
+    var dataType = document.getElementById('typeSelect').value;
+
+    if (!portName) {
+        document.getElementById('currentInfo').textContent = "尚未選擇";
+        return;
+    }
+
+    document.getElementById('currentInfo').textContent = portName + "　" + normalRanges[dataType].label;
+    zoomToPort(portName);
+    updateMainChart(portName, dataType);
+}
+
+function getPortData(portName) {
+    var rows = portDataMap[portName] || [];
+    return rows.slice().sort((a,b) => (a.year*100+parseInt(a.month)) - (b.year*100+parseInt(b.month)));
+}
+
+function updateMainChart(portName, dataType) {
+    var rows = getPortData(portName);
+    if (!rows.length) { if (mainChart) mainChart.destroy(); return; }
+
+    var cfg = normalRanges[dataType];
+    var labels = rows.map(r => r.year + "/" + r.month);
+    var values = rows.map(r => parseFloat(r[dataType]));
+
+    // 標記異常點顏色
+    var pointColors = values.map(v => {
+        if (v < cfg.min || v > cfg.max) return '#ea4335';
+        return '#1a73e8';
+    });
+
+    if (mainChart) mainChart.destroy();
+    var ctx = document.getElementById('mainChart').getContext('2d');
+    mainChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: cfg.label,
+                data: values,
+                borderColor: '#1a73e8',
+                backgroundColor: '#1a73e8',
+                pointBackgroundColor: pointColors,
+                pointRadius: 5,
+                fill: false,
+                tension: 0.1
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            scales: { y: getYAxisConfig(dataType) },
+            interaction: { mode:'index', intersect:false },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        afterBody: function(context) {
+                            var row = rows[context[0].dataIndex];
+                            var v = parseFloat(row[dataType]);
+                            var status = (v < cfg.min || v > cfg.max) ? '⚠️ 異常' : '✅ 正常';
+                            return ['', '狀態: ' + status,
+                                '採樣時間: ' + (row['採樣時間']||'無'),
+                                '潮汐: ' + (row['潮汐']||'無'),
+                                '天氣: ' + (row['天氣']||'無') + ' ' + (weatherIcons[row['天氣']]||'')];
+                        }
+                    },
+                    titleFont:{size:14}, bodyFont:{size:13}, padding:10,
+                    backgroundColor:'rgba(0,0,0,0.8)'
+                }
+            }
+        }
+    });
+}
+
+// ===================================================
+// Tab 2：多港口比較
+// ===================================================
+function updateCompareChart() {
+    var portA    = document.getElementById('comparePortA').value;
+    var portB    = document.getElementById('comparePortB').value;
+    var dataType = document.getElementById('compareType').value;
+
+    if (!portA || !portB) {
+        document.getElementById('compareInfo').textContent = "請選擇兩個漁港進行比較";
+        return;
+    }
+    if (portA === portB) {
+        document.getElementById('compareInfo').textContent = "⚠️ 請選擇不同的兩個漁港";
+        return;
+    }
+
+    var cfg    = normalRanges[dataType];
+    var rowsA  = getPortData(portA);
+    var rowsB  = getPortData(portB);
+
+    // 取兩港口共同的時間標籤（聯集）
+    var labelsA = rowsA.map(r => r.year + "/" + r.month);
+    var labelsB = rowsB.map(r => r.year + "/" + r.month);
+    var allLabels = Array.from(new Set([...labelsA, ...labelsB])).sort((a,b) => {
+        var [ya,ma] = a.split('/').map(Number);
+        var [yb,mb] = b.split('/').map(Number);
+        return (ya*100+ma) - (yb*100+mb);
+    });
+
+    function mapValues(rows, labels) {
+        var map = {};
+        rows.forEach(r => { map[r.year+"/"+r.month] = parseFloat(r[dataType]); });
+        return labels.map(l => map[l] !== undefined ? map[l] : null);
+    }
+
+    var valuesA = mapValues(rowsA, allLabels);
+    var valuesB = mapValues(rowsB, allLabels);
+
+    document.getElementById('compareInfo').textContent =
+        portA + " vs " + portB + "　" + cfg.label;
+
+    if (compareChart) compareChart.destroy();
+    var ctx = document.getElementById('compareChart').getContext('2d');
+    compareChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: allLabels,
+            datasets: [
+                {
+                    label: portA,
+                    data: valuesA,
+                    borderColor: chartColors[0],
+                    backgroundColor: chartColors[0],
+                    fill: false, tension: 0.1, spanGaps: true
+                },
+                {
+                    label: portB,
+                    data: valuesB,
+                    borderColor: chartColors[1],
+                    backgroundColor: chartColors[1],
+                    fill: false, tension: 0.1, spanGaps: true,
+                    borderDash: [5,4]
+                }
+            ]
+        },
+        options: {
+            maintainAspectRatio: false,
+            scales: { y: getYAxisConfig(dataType) },
+            interaction: { mode:'index', intersect:false },
+            plugins: {
+                legend: { position:'top' },
+                tooltip: {
+                    titleFont:{size:13}, bodyFont:{size:13}, padding:10,
+                    backgroundColor:'rgba(0,0,0,0.8)'
+                }
+            }
+        }
+    });
+}
+
+// ===================================================
+// Tab 3：水質報告
+// ===================================================
+document.getElementById('reportType').addEventListener('change', function() {
+    document.getElementById('reportPortRow').style.display =
+        this.value === 'single' ? 'block' : 'none';
+});
+
+function generateReport() {
+    var reportType = document.getElementById('reportType').value;
+    var container  = document.getElementById('reportContent');
+    container.innerHTML = '';
+
+    if (reportType === 'single') {
+        var portName = document.getElementById('reportPortSelect').value;
+        if (!portName) { alert('請先選擇漁港！'); return; }
+        container.appendChild(buildSingleReport(portName));
+    } else {
+        // 綜合報告：所有有資料的漁港
+        var ports = Object.keys(portDataMap).sort();
+        if (!ports.length) { alert('尚無資料！'); return; }
+
+        // 報告標頭
+        var header = document.createElement('div');
+        header.innerHTML = `
+            <h2 style="text-align:center;color:#1a73e8;">宜蘭漁港水質綜合監測報告</h2>
+            <p style="text-align:center;color:#555;">產生時間：${new Date().toLocaleString('zh-TW')}</p>
+            <hr>`;
+        container.appendChild(header);
+
+        // 綜合統計總表
+        container.appendChild(buildSummaryTable(ports));
+
+        // 每個漁港個別報告
+        ports.forEach(p => container.appendChild(buildSingleReport(p, true)));
+    }
+}
+
+function buildSingleReport(portName, isSubSection) {
+    var rows = getPortData(portName);
+    var wrap = document.createElement('div');
+    wrap.className = 'report-section';
+    wrap.style.cssText = 'margin-bottom:30px; border:1px solid #ddd; border-radius:8px; padding:16px;';
+
+    var title = isSubSection ? `<h3 style="color:#1a73e8;margin-top:0;">📍 ${portName}</h3>`
+        : `<h2 style="text-align:center;color:#1a73e8;">宜蘭漁港水質監測報告</h2>
+           <h3 style="text-align:center;">📍 ${portName}</h3>
+           <p style="text-align:center;color:#555;">產生時間：${new Date().toLocaleString('zh-TW')}</p><hr>`;
+    wrap.innerHTML = title;
+
+    if (!rows.length) {
+        wrap.innerHTML += '<p style="color:#999;">此漁港尚無資料。</p>';
+        return wrap;
+    }
+
+    // 統計摘要
+    var statsDiv = document.createElement('div');
+    statsDiv.innerHTML = '<h4>📊 各項目統計摘要</h4>';
+    statsDiv.appendChild(buildStatsTable(rows, portName));
+    wrap.appendChild(statsDiv);
+
+    // 異常記錄
+    var anomalyDiv = document.createElement('div');
+    anomalyDiv.innerHTML = '<h4 style="margin-top:14px;">⚠️ 異常記錄</h4>';
+    anomalyDiv.appendChild(buildAnomalyTable(rows));
+    wrap.appendChild(anomalyDiv);
+
+    return wrap;
+}
+
+function buildStatsTable(rows, portName) {
+    var types = ['ph','do','EC','salinity'];
+    var html = `<table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+            <tr style="background:#1a73e8;color:#fff;">
+                <th style="padding:6px 8px;text-align:left;">項目</th>
+                <th style="padding:6px 8px;">最新值</th>
+                <th style="padding:6px 8px;">平均值</th>
+                <th style="padding:6px 8px;">最小值</th>
+                <th style="padding:6px 8px;">最大值</th>
+                <th style="padding:6px 8px;">狀態</th>
+            </tr>
+        </thead><tbody>`;
+
+    types.forEach(function(t, i) {
+        var cfg    = normalRanges[t];
+        var values = rows.map(r => parseFloat(r[t])).filter(v => !isNaN(v));
+        if (!values.length) return;
+
+        var latest = values[values.length-1];
+        var avg    = (values.reduce((a,b)=>a+b,0)/values.length).toFixed(2);
+        var min    = Math.min(...values).toFixed(2);
+        var max    = Math.max(...values).toFixed(2);
+        var status = (latest < cfg.min || latest > cfg.max)
+            ? '<span class="badge-bad">異常</span>'
+            : '<span class="badge-ok">正常</span>';
+        var bg = i%2===0 ? '#f8f9fa' : '#fff';
+
+        html += `<tr style="background:${bg};">
+            <td style="padding:6px 8px;font-weight:bold;">${cfg.label}</td>
+            <td style="padding:6px 8px;text-align:center;">${latest}${cfg.unit}</td>
+            <td style="padding:6px 8px;text-align:center;">${avg}${cfg.unit}</td>
+            <td style="padding:6px 8px;text-align:center;">${min}${cfg.unit}</td>
+            <td style="padding:6px 8px;text-align:center;">${max}${cfg.unit}</td>
+            <td style="padding:6px 8px;text-align:center;">${status}</td>
+        </tr>`;
+    });
+
+    html += '</tbody></table>';
+    var div = document.createElement('div');
+    div.innerHTML = html;
+    return div;
+}
+
+function buildAnomalyTable(rows) {
+    var types    = ['ph','do','EC','salinity'];
+    var anomalies = [];
+
+    rows.forEach(function(r) {
+        types.forEach(function(t) {
+            var v   = parseFloat(r[t]);
+            var cfg = normalRanges[t];
+            if (!isNaN(v) && (v < cfg.min || v > cfg.max)) {
+                anomalies.push({
+                    time:  r.year + "/" + r.month,
+                    item:  cfg.label,
+                    value: v + cfg.unit,
+                    range: cfg.min + " ~ " + cfg.max + cfg.unit
+                });
+            }
+        });
+    });
+
+    if (!anomalies.length) {
+        var p = document.createElement('p');
+        p.style.color = '#34a853';
+        p.textContent = '✅ 監測期間內無異常記錄。';
+        return p;
+    }
+
+    var html = `<table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+            <tr style="background:#ea4335;color:#fff;">
+                <th style="padding:6px 8px;">時間</th>
+                <th style="padding:6px 8px;">項目</th>
+                <th style="padding:6px 8px;">實測值</th>
+                <th style="padding:6px 8px;">正常範圍</th>
+            </tr>
+        </thead><tbody>`;
+
+    anomalies.forEach(function(a, i) {
+        var bg = i%2===0 ? '#fff3f3' : '#fff';
+        html += `<tr style="background:${bg};">
+            <td style="padding:6px 8px;text-align:center;">${a.time}</td>
+            <td style="padding:6px 8px;">${a.item}</td>
+            <td style="padding:6px 8px;text-align:center;color:#ea4335;font-weight:bold;">${a.value}</td>
+            <td style="padding:6px 8px;text-align:center;">${a.range}</td>
+        </tr>`;
+    });
+
+    html += '</tbody></table>';
+    var div = document.createElement('div');
+    div.innerHTML = html;
+    return div;
+}
+
+function buildSummaryTable(ports) {
+    var types = ['ph','do','EC','salinity'];
+    var html = `<h3>📋 各漁港最新水質總覽</h3>
+        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:20px;">
+        <thead>
+            <tr style="background:#1a73e8;color:#fff;">
+                <th style="padding:6px 8px;text-align:left;">漁港</th>
+                <th style="padding:6px 8px;">pH</th>
+                <th style="padding:6px 8px;">DO (mg/L)</th>
+                <th style="padding:6px 8px;">EC (mS/cm)</th>
+                <th style="padding:6px 8px;">鹽度 (ppt)</th>
+                <th style="padding:6px 8px;">整體狀態</th>
+            </tr>
+        </thead><tbody>`;
+
+    ports.forEach(function(port, i) {
+        var rows = getPortData(port);
+        if (!rows.length) return;
+        var last = rows[rows.length-1];
+        var hasAnomaly = false;
+        var cells = types.map(function(t) {
+            var v   = parseFloat(last[t]);
+            var cfg = normalRanges[t];
+            if (isNaN(v)) return '<td style="padding:6px 8px;text-align:center;">-</td>';
+            var bad = (v < cfg.min || v > cfg.max);
+            if (bad) hasAnomaly = true;
+            var color = bad ? 'color:#ea4335;font-weight:bold;' : '';
+            return `<td style="padding:6px 8px;text-align:center;${color}">${v}</td>`;
+        });
+        var statusBadge = hasAnomaly
+            ? '<span class="badge-bad">異常</span>'
+            : '<span class="badge-ok">正常</span>';
+        var bg = i%2===0 ? '#f8f9fa' : '#fff';
+        html += `<tr style="background:${bg};">
+            <td style="padding:6px 8px;font-weight:bold;">${port}</td>
+            ${cells.join('')}
+            <td style="padding:6px 8px;text-align:center;">${statusBadge}</td>
+        </tr>`;
+    });
+
+    html += '</tbody></table>';
+    var div = document.createElement('div');
+    div.innerHTML = html;
+    return div;
+}
+
+// ===================================================
+// 共用工具
+// ===================================================
+function getYAxisConfig(dataType) {
+    var cfgs = {
+        ph:       { min:5,  max:9,  stepSize:0.5 },
+        do:       { min:0,  max:10, stepSize:1   },
+        EC:       { min:30, max:55, stepSize:5   },
+        salinity: { min:20, max:48, stepSize:4   }
+    };
+    var c = cfgs[dataType];
+    return { min:c.min, max:c.max, ticks:{ stepSize:c.stepSize } };
+}
+</script>
+</body>
+</html>
