@@ -76,7 +76,11 @@ label { font-weight:bold; display:block; font-size:13px; }
     #MapDiv { display:none !important; }
     #controlPanel { width:100% !important; height:auto !important; border:none !important; overflow:visible !important; padding:10px !important; }
     .tab-bar { display:none !important; }
-    .tab-content { display:block !important; }
+    /* 所有 tab 預設隱藏 */
+    .tab-content { display:none !important; }
+    /* 只顯示水質報告 tab */
+    #tab-report { display:block !important; }
+    /* 隱藏報告 tab 內的操作按鈕與選單 */
     .btn-report, .btn-print, .no-print { display:none !important; }
     .report-section { page-break-inside:avoid; }
     .report-chart-grid { page-break-inside:avoid; }
