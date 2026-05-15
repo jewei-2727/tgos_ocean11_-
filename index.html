@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <title>宜蘭漁港水質監測系統</title>
 
-<script type="text/javascript" 
-    src="https://api.tgos.tw/TGOS_API/tgos?ver=2&AppID=x+JLVSx85Lk=&APIKey=in8W74q0ogpcfW/STwicK8D5QwCdddJf05/7nb+OtDh8R99YN3T0LurV4xato3TpL/fOfylvJ9Wv/khZEsXEWxsBmg+GEj4AuokiNXCh14Rei21U5GtJpIkO++Mq3AguFK/ISDEWn4hMzqgrkxNe1Q==" 
+<script type="text/javascript"
+    src="https://api.tgos.tw/TGOS_API/tgos?ver=2&AppID=x+JLVSx85Lk=&APIKey=in8W74q0ogpcfW/STwicK8D5QwCdddJf05/7nb+OtDh8R99YN3T0LurV4xato3TpL/fOfylvJ9Wv/khZEsXEWxsBmg+GEj4AuokiNXCh14Rei21U5GtJpIkO++Mq3AguFK/ISDEWn4hMzqgrkxNe1Q=="
     charset="utf-8"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <style>
-body { margin:0; font-family:"Microsoft JhengHei", sans-serif; display:flex; height:100vh; width:100vw; overflow:hidden; }
+body { margin:0; font-family:"Microsoft JhengHei",sans-serif; display:flex; height:100vh; width:100vw; overflow:hidden; }
 #MapDiv { flex:1; height:100%; }
 #controlPanel {
     width:420px; height:100%; background:#fff;
@@ -23,7 +23,7 @@ h3 { color:#1a73e8; border-bottom:2px solid #1a73e8; padding-bottom:8px; margin-
 .tab-bar { display:flex; border-bottom:2px solid #1a73e8; margin-bottom:16px; }
 .tab-btn {
     flex:1; padding:8px; border:none; background:#f0f4ff;
-    cursor:pointer; font-size:13px; font-family:"Microsoft JhengHei", sans-serif;
+    cursor:pointer; font-size:13px; font-family:"Microsoft JhengHei",sans-serif;
     border-radius:6px 6px 0 0; color:#555;
 }
 .tab-btn.active { background:#1a73e8; color:#fff; font-weight:bold; }
@@ -32,19 +32,19 @@ h3 { color:#1a73e8; border-bottom:2px solid #1a73e8; padding-bottom:8px; margin-
 
 .row { margin-bottom:14px; }
 select { width:100%; padding:8px; font-size:14px; margin-top:4px; box-sizing:border-box; }
-label { font-weight:bold; display:block; font-size:13px; }
+label  { font-weight:bold; display:block; font-size:13px; }
 
 .btn-report {
     background:#34a853; color:#fff; border:none;
     padding:10px; border-radius:6px; cursor:pointer;
-    font-size:14px; font-family:"Microsoft JhengHei", sans-serif;
+    font-size:14px; font-family:"Microsoft JhengHei",sans-serif;
     margin-top:6px; width:100%;
 }
 .btn-report:hover { background:#2d8f47; }
 .btn-print {
     background:#555; color:#fff; border:none;
     padding:10px; border-radius:6px; cursor:pointer;
-    font-size:14px; font-family:"Microsoft JhengHei", sans-serif;
+    font-size:14px; font-family:"Microsoft JhengHei",sans-serif;
     margin-top:6px; width:100%;
 }
 
@@ -54,21 +54,15 @@ label { font-weight:bold; display:block; font-size:13px; }
 .badge-ok  { background:#34a853; color:#fff; border-radius:4px; padding:2px 7px; font-size:12px; }
 .badge-bad { background:#ea4335; color:#fff; border-radius:4px; padding:2px 7px; font-size:12px; }
 
-/* 報告內 2x2 格線圖表 */
 .report-chart-grid {
-    display:grid;
-    grid-template-columns: 1fr 1fr;
-    gap:12px;
-    margin-bottom:16px;
+    display:grid; grid-template-columns:1fr 1fr;
+    gap:12px; margin-bottom:16px;
 }
 .report-chart-box {
     border:1px solid #ddd; border-radius:6px;
     padding:8px; background:#fafafa;
 }
-.report-chart-box h5 {
-    margin:0 0 4px 0; font-size:12px;
-    color:#333; text-align:center;
-}
+.report-chart-box h5 { margin:0 0 4px 0; font-size:12px; color:#333; text-align:center; }
 .report-chart-container { position:relative; height:150px; width:100%; }
 
 @media print {
@@ -76,11 +70,8 @@ label { font-weight:bold; display:block; font-size:13px; }
     #MapDiv { display:none !important; }
     #controlPanel { width:100% !important; height:auto !important; border:none !important; overflow:visible !important; padding:10px !important; }
     .tab-bar { display:none !important; }
-    /* 所有 tab 預設隱藏 */
     .tab-content { display:none !important; }
-    /* 只顯示水質報告 tab */
-    #tab-report { display:block !important; }
-    /* 隱藏報告 tab 內的操作按鈕與選單 */
+    #tab-report  { display:block !important; }
     .btn-report, .btn-print, .no-print { display:none !important; }
     .report-section { page-break-inside:avoid; }
     .report-chart-grid { page-break-inside:avoid; }
@@ -174,9 +165,9 @@ label { font-weight:bold; display:block; font-size:13px; }
 // ===================================================
 // 全域變數
 // ===================================================
-var map         = null;
-var portDataMap = {};
-var markers     = {};
+var map          = null;
+var portDataMap  = {};
+var markers      = {};
 var mainChart    = null;
 var compareChart = null;
 var reportCharts = [];
@@ -200,12 +191,13 @@ var portsCoords = {
 
 var weatherIcons = { "晴":"☀️", "陰":"☁️", "雨":"🌧️" };
 
-// 異常判斷範圍
+// 丙類海域標準
+// noStd:true = 無標準值（鹽度、EC），不判斷異常、不畫紅線
 var normalRanges = {
-    ph:       { min:7.0, max:8.5,  unit:"",       label:"pH 值",       color:"#f4a300" },
-    do:       { min:2.0, max:10.0, unit:" mg/L",  label:"溶氧量 (DO)", color:"#1a73e8" },
-    EC:       { min:30,  max:55,   unit:" mS/cm", label:"導電度 (EC)", color:"#34a853" },
-    salinity: { min:0,   max:45,   unit:" ppt",   label:"鹽度",        color:"#9c27b0" }
+    ph:       { min:7.0, max:8.5,  unit:"",       label:"pH 值",       color:"#f4a300", noStd:false },
+    do:       { min:2.0, max:null, unit:" mg/L",  label:"溶氧量 (DO)", color:"#1a73e8", noStd:false },
+    EC:       { min:null,max:null, unit:" mS/cm", label:"導電度 (EC)", color:"#34a853", noStd:true  },
+    salinity: { min:null,max:null, unit:" ppt",   label:"鹽度",        color:"#9c27b0", noStd:true  }
 };
 
 // ===================================================
@@ -235,7 +227,7 @@ function updateAllDropdowns() {
         var sel   = document.getElementById(id);
         var first = sel.options[0].outerHTML;
         sel.innerHTML = first;
-        names.forEach(n => {
+        names.forEach(function(n) {
             var o = document.createElement('option');
             o.value = n; o.textContent = n;
             sel.appendChild(o);
@@ -268,7 +260,7 @@ function initMap() {
 
 function createMarkers() {
     var img = new TGOS.TGImage("https://api.tgos.tw/TGOS_API/images/marker2.png", new TGOS.TGSize(38,33));
-    Object.keys(portsCoords).forEach(name => {
+    Object.keys(portsCoords).forEach(function(name) {
         var pt = new TGOS.TGPoint(portsCoords[name].x, portsCoords[name].y);
         var mk = new TGOS.TGMarker(map, pt, name, img);
         markers[name] = mk;
@@ -291,21 +283,130 @@ function zoomToPort(portName) {
 // Tab 切換
 // ===================================================
 function switchTab(tabId) {
-    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(function(el) { el.classList.remove('active'); });
+    document.querySelectorAll('.tab-btn').forEach(function(el) { el.classList.remove('active'); });
     document.getElementById(tabId).classList.add('active');
     var idx = ['tab-single','tab-compare','tab-report'].indexOf(tabId);
     document.querySelectorAll('.tab-btn')[idx].classList.add('active');
 }
 
 // ===================================================
-// Tab 1：單一港口
+// 共用工具
 // ===================================================
 function getPortData(portName) {
     return (portDataMap[portName] || []).slice()
-        .sort((a,b) => (a.year*100+parseInt(a.month)) - (b.year*100+parseInt(b.month)));
+        .sort(function(a,b) { return (a.year*100+parseInt(a.month)) - (b.year*100+parseInt(b.month)); });
 }
 
+// 取最新月份資料（優先找當月，否則取最後一筆）
+function getLatestRow(portName) {
+    var rows = getPortData(portName);
+    if (!rows.length) return null;
+    var now   = new Date();
+    var curY  = now.getFullYear();
+    var curM  = now.getMonth() + 1;
+    var found = rows.find(function(r) {
+        return parseInt(r.year) === curY && parseInt(r.month) === curM;
+    });
+    return found || rows[rows.length - 1];
+}
+
+// 判斷某值是否異常
+function isAbnormal(type, value) {
+    var cfg = normalRanges[type];
+    if (cfg.noStd || isNaN(value)) return false;
+    if (cfg.min !== null && value < cfg.min) return true;
+    if (cfg.max !== null && value > cfg.max) return true;
+    return false;
+}
+
+// Y 軸設定
+function getYAxisConfig(dataType, smallFont) {
+    var cfgs = {
+        ph:       { min:5,  max:10, stepSize:0.5 },
+        do:       { min:0,  max:10, stepSize:1   },
+        EC:       { min:30, max:55, stepSize:5   },
+        salinity: { min:0,  max:50, stepSize:5   }
+    };
+    var c        = cfgs[dataType];
+    var fontSize = smallFont ? 9 : 12;
+    return {
+        min: c.min, max: c.max,
+        ticks: { stepSize: c.stepSize, font:{ size: fontSize } }
+    };
+}
+
+// 建立 datasets：資料線 + 紅色虛線閾值
+function buildThresholdDatasets(cfg, values, ptColors, n) {
+    var datasets = [{
+        label: cfg.label,
+        data: values,
+        borderColor: cfg.color,
+        backgroundColor: cfg.color,
+        pointBackgroundColor: ptColors,
+        pointRadius: 5,
+        fill:false, tension:0.1, order:1
+    }];
+    if (cfg.noStd) return datasets;
+
+    var redLine = {
+        label: '__threshold__',
+        borderColor: '#ea4335',
+        borderWidth: 1.5,
+        borderDash: [6,4],
+        pointRadius: 0,
+        fill: false,
+        tension: 0,
+        order: 2
+    };
+    // 下限紅線
+    if (cfg.min !== null) {
+        datasets.push(Object.assign({}, redLine, { data: Array(n).fill(cfg.min) }));
+    }
+    // 上限紅線
+    if (cfg.max !== null) {
+        datasets.push(Object.assign({}, redLine, { data: Array(n).fill(cfg.max) }));
+    }
+    return datasets;
+}
+
+// 同樣適用於報告小圖（pointRadius 縮小）
+function buildThresholdDatasetsSmall(cfg, values, ptColors, n) {
+    var datasets = [{
+        label: cfg.label,
+        data: values,
+        borderColor: cfg.color,
+        backgroundColor: cfg.color,
+        pointBackgroundColor: ptColors,
+        pointRadius: 3,
+        fill:false, tension:0.1, order:1
+    }];
+    if (cfg.noStd) return datasets;
+    var redLine = {
+        label: '__threshold__',
+        borderColor: '#ea4335',
+        borderWidth: 1.2,
+        borderDash: [5,3],
+        pointRadius: 0,
+        fill: false,
+        tension: 0,
+        order: 2
+    };
+    if (cfg.min !== null) {
+        datasets.push(Object.assign({}, redLine, { data: Array(n).fill(cfg.min) }));
+    }
+    if (cfg.max !== null) {
+        datasets.push(Object.assign({}, redLine, { data: Array(n).fill(cfg.max) }));
+    }
+    return datasets;
+}
+
+// tooltip / legend 過濾閾值線
+var thresholdFilter = { filter: function(item) { return item.dataset.label !== '__threshold__'; } };
+
+// ===================================================
+// Tab 1：單一港口
+// ===================================================
 function onFilterChange() {
     var portName = document.getElementById('portSelect').value;
     var dataType = document.getElementById('typeSelect').value;
@@ -316,43 +417,43 @@ function onFilterChange() {
 }
 
 function updateMainChart(portName, dataType) {
-    var rows = getPortData(portName);
+    var rows   = getPortData(portName);
     if (!rows.length) { if (mainChart) mainChart.destroy(); return; }
     var cfg      = normalRanges[dataType];
-    var labels   = rows.map(r => r.year + "/" + r.month);
-    var values   = rows.map(r => parseFloat(r[dataType]));
-    var ptColors = values.map(v => (v < cfg.min || v > cfg.max) ? '#ea4335' : cfg.color);
+    var labels   = rows.map(function(r) { return r.year + "/" + r.month; });
+    var values   = rows.map(function(r) { return parseFloat(r[dataType]); });
+    var ptColors = values.map(function(v) { return isAbnormal(dataType, v) ? '#ea4335' : cfg.color; });
+
     if (mainChart) mainChart.destroy();
     var ctx = document.getElementById('mainChart').getContext('2d');
     mainChart = new Chart(ctx, {
         type:'line',
         data:{
             labels: labels,
-            datasets:[{
-                label: cfg.label,
-                data: values,
-                borderColor: cfg.color,
-                backgroundColor: cfg.color,
-                pointBackgroundColor: ptColors,
-                pointRadius: 5,
-                fill:false, tension:0.1
-            }]
+            datasets: buildThresholdDatasets(cfg, values, ptColors, labels.length)
         },
         options:{
             maintainAspectRatio:false,
             scales:{ y: getYAxisConfig(dataType) },
             interaction:{ mode:'index', intersect:false },
             plugins:{
+                legend:{ labels: thresholdFilter },
                 tooltip:{
+                    filter: thresholdFilter.filter,
                     callbacks:{
                         afterBody: function(ctx) {
                             var row    = rows[ctx[0].dataIndex];
                             var v      = parseFloat(row[dataType]);
-                            var status = (v < cfg.min || v > cfg.max) ? '⚠️ 異常' : '✅ 正常';
-                            return ['','狀態: '+status,
+                            var lines  = [''];
+                            if (!cfg.noStd) {
+                                lines.push('狀態: ' + (isAbnormal(dataType, v) ? '⚠️ 異常' : '✅ 正常'));
+                            }
+                            lines.push(
                                 '採樣時間: '+(row['採樣時間']||'無'),
                                 '潮汐: '+(row['潮汐']||'無'),
-                                '天氣: '+(row['天氣']||'無')+' '+(weatherIcons[row['天氣']]||'')];
+                                '天氣: '+(row['天氣']||'無')+' '+(weatherIcons[row['天氣']]||'')
+                            );
+                            return lines;
                         }
                     },
                     titleFont:{size:14}, bodyFont:{size:13}, padding:10,
@@ -378,37 +479,48 @@ function updateCompareChart() {
     var rowsA = getPortData(portA);
     var rowsB = getPortData(portB);
 
-    var labelsA   = rowsA.map(r => r.year+"/"+r.month);
-    var labelsB   = rowsB.map(r => r.year+"/"+r.month);
-    var allLabels = Array.from(new Set([...labelsA,...labelsB])).sort((a,b) => {
-        var [ya,ma]=a.split('/').map(Number), [yb,mb]=b.split('/').map(Number);
-        return (ya*100+ma)-(yb*100+mb);
+    var labelsA   = rowsA.map(function(r) { return r.year+"/"+r.month; });
+    var labelsB   = rowsB.map(function(r) { return r.year+"/"+r.month; });
+    var allLabels = Array.from(new Set(labelsA.concat(labelsB))).sort(function(a,b) {
+        var pa=a.split('/').map(Number), pb=b.split('/').map(Number);
+        return (pa[0]*100+pa[1])-(pb[0]*100+pb[1]);
     });
 
     function mapVals(rows) {
         var m = {};
-        rows.forEach(r => m[r.year+"/"+r.month] = parseFloat(r[dataType]));
-        return allLabels.map(l => m[l] !== undefined ? m[l] : null);
+        rows.forEach(function(r) { m[r.year+"/"+r.month] = parseFloat(r[dataType]); });
+        return allLabels.map(function(l) { return m[l] !== undefined ? m[l] : null; });
     }
 
     document.getElementById('compareInfo').textContent = portA + " vs " + portB + "　" + cfg.label;
 
     if (compareChart) compareChart.destroy();
     var ctx = document.getElementById('compareChart').getContext('2d');
+    var n   = allLabels.length;
+
+    // 基礎兩條資料線
+    var datasets = [
+        { label:portA, data:mapVals(rowsA), borderColor:'#1a73e8', backgroundColor:'#1a73e8', fill:false, tension:0.1, spanGaps:true, pointRadius:4, order:1 },
+        { label:portB, data:mapVals(rowsB), borderColor:'#ea4335', backgroundColor:'#ea4335', fill:false, tension:0.1, spanGaps:true, borderDash:[5,4], pointRadius:4, order:1 }
+    ];
+    // 加閾值紅線
+    if (!cfg.noStd) {
+        var redLine = { label:'__threshold__', borderColor:'#ea4335', borderWidth:1.2, borderDash:[6,4], pointRadius:0, fill:false, tension:0, order:2 };
+        if (cfg.min !== null) datasets.push(Object.assign({}, redLine, { data: Array(n).fill(cfg.min) }));
+        if (cfg.max !== null) datasets.push(Object.assign({}, redLine, { data: Array(n).fill(cfg.max) }));
+    }
+
     compareChart = new Chart(ctx, {
         type:'line',
-        data:{
-            labels: allLabels,
-            datasets:[
-                { label:portA, data:mapVals(rowsA), borderColor:'#1a73e8', backgroundColor:'#1a73e8', fill:false, tension:0.1, spanGaps:true },
-                { label:portB, data:mapVals(rowsB), borderColor:'#ea4335', backgroundColor:'#ea4335', fill:false, tension:0.1, spanGaps:true, borderDash:[5,4] }
-            ]
-        },
+        data:{ labels: allLabels, datasets: datasets },
         options:{
             maintainAspectRatio:false,
             scales:{ y: getYAxisConfig(dataType) },
             interaction:{ mode:'index', intersect:false },
-            plugins:{ legend:{ position:'top' } }
+            plugins:{
+                legend:{ position:'top', labels: thresholdFilter },
+                tooltip:{ filter: thresholdFilter.filter }
+            }
         }
     });
 }
@@ -417,19 +529,16 @@ function updateCompareChart() {
 // Tab 3：水質報告
 // ===================================================
 function generateReport() {
-    // 銷毀舊報告圖表
-    reportCharts.forEach(c => c.destroy());
+    reportCharts.forEach(function(c) { c.destroy(); });
     reportCharts = [];
 
     var reportType = document.getElementById('reportType').value;
     var container  = document.getElementById('reportContent');
     container.innerHTML = '';
 
-    // chartTasks 收集所有待渲染圖表 { canvas, rows, type }
-    var chartTasks = [];
+    var chartTasks = [];   // { canvas, rows, type }
 
     if (reportType === 'single') {
-        // ★ 完全獨立讀取 reportPortSelect，與其他 Tab 無關
         var portName = document.getElementById('reportPortSelect').value;
         if (!portName) { alert('請先選擇漁港！'); return; }
         container.appendChild(buildSingleReport(portName, false, chartTasks));
@@ -442,48 +551,32 @@ function generateReport() {
             '<p style="text-align:center;color:#555;">產生時間：' + new Date().toLocaleString('zh-TW') + '</p><hr>';
         container.appendChild(header);
         container.appendChild(buildSummaryTable(ports));
-        ports.forEach(p => container.appendChild(buildSingleReport(p, true, chartTasks)));
+        ports.forEach(function(p) { container.appendChild(buildSingleReport(p, true, chartTasks)); });
     }
 
-    // ★ DOM 已插入後統一渲染所有圖表，canvas 尺寸才正確
+    // DOM 插入後統一渲染圖表
     requestAnimationFrame(function() {
         chartTasks.forEach(function(task) {
             var cfg      = normalRanges[task.type];
-            var values   = task.rows.map(r => parseFloat(r[task.type]));
-            var labels   = task.rows.map(r => r.year + "/" + r.month);
-            var ptColors = values.map(v => (v < cfg.min || v > cfg.max) ? '#ea4335' : cfg.color);
+            var values   = task.rows.map(function(r) { return parseFloat(r[task.type]); });
+            var labels   = task.rows.map(function(r) { return r.year + "/" + r.month; });
+            var ptColors = values.map(function(v) { return isAbnormal(task.type, v) ? '#ea4335' : cfg.color; });
 
             var c = new Chart(task.canvas.getContext('2d'), {
                 type:'line',
                 data:{
                     labels: labels,
-                    datasets:[{
-                        label: cfg.label,
-                        data: values,
-                        borderColor: cfg.color,
-                        backgroundColor: cfg.color,
-                        pointBackgroundColor: ptColors,
-                        pointRadius: 3,
-                        fill:false, tension:0.1
-                    }]
+                    datasets: buildThresholdDatasetsSmall(cfg, values, ptColors, labels.length)
                 },
                 options:{
                     maintainAspectRatio:false,
                     scales:{
-                        x:{
-                            ticks:{
-                                font:{ size:9 },
-                                maxRotation:45,
-                                minRotation:45,
-                                autoSkip:true,
-                                maxTicksLimit:6
-                            }
-                        },
+                        x:{ ticks:{ font:{ size:9 }, maxRotation:45, minRotation:45, autoSkip:true, maxTicksLimit:6 } },
                         y: getYAxisConfig(task.type, true)
                     },
                     plugins:{
                         legend:{ display:false },
-                        tooltip:{ enabled:true }
+                        tooltip:{ filter: thresholdFilter.filter, enabled:true }
                     }
                 }
             });
@@ -492,11 +585,11 @@ function generateReport() {
     });
 }
 
-// ----- 單一港口報告區塊（回傳 DOM，圖表任務推入 chartTasks） -----
+// ----- 單一港口報告區塊 -----
 function buildSingleReport(portName, isSubSection, chartTasks) {
     var rows = getPortData(portName);
     var wrap = document.createElement('div');
-    wrap.className = 'report-section';
+    wrap.className    = 'report-section';
     wrap.style.cssText = 'margin-bottom:24px;border:1px solid #ddd;border-radius:8px;padding:14px;';
 
     if (isSubSection) {
@@ -515,17 +608,16 @@ function buildSingleReport(portName, isSubSection, chartTasks) {
 
     // 統計摘要表
     var statsDiv = document.createElement('div');
-    statsDiv.innerHTML = '<h4 style="margin:0 0 8px 0;">📊 各項目統計摘要</h4>';
+    statsDiv.innerHTML = '<h4 style="margin:0 0 8px 0;">📊 各項目統計摘要（丙類海域標準）</h4>';
     statsDiv.appendChild(buildStatsTable(rows));
     wrap.appendChild(statsDiv);
 
-    // 趨勢圖標題
-    var chartTitle = document.createElement('h4');
+    // 趨勢圖
+    var chartTitle      = document.createElement('h4');
     chartTitle.style.cssText = 'margin:14px 0 8px 0;';
     chartTitle.textContent   = '📈 各項目趨勢圖';
     wrap.appendChild(chartTitle);
 
-    // 2x2 格線：建立 canvas 並記錄任務，不在這裡渲染
     var grid = document.createElement('div');
     grid.className = 'report-chart-grid';
 
@@ -535,14 +627,13 @@ function buildSingleReport(portName, isSubSection, chartTasks) {
         box.className = 'report-chart-box';
         box.innerHTML = '<h5>' + cfg.label + '</h5>';
 
-        var canvasWrap = document.createElement('div');
-        canvasWrap.className = 'report-chart-container';
+        var cw = document.createElement('div');
+        cw.className = 'report-chart-container';
         var canvas = document.createElement('canvas');
-        canvasWrap.appendChild(canvas);
-        box.appendChild(canvasWrap);
+        cw.appendChild(canvas);
+        box.appendChild(cw);
         grid.appendChild(box);
 
-        // 推入任務，等 DOM 插入後再統一渲染
         chartTasks.push({ canvas: canvas, rows: rows, type: t });
     });
 
@@ -560,39 +651,50 @@ function buildSingleReport(portName, isSubSection, chartTasks) {
 // ----- 統計摘要表 -----
 function buildStatsTable(rows) {
     var types = ['ph','do','EC','salinity'];
-    var html  = '<table style="width:100%;border-collapse:collapse;font-size:12px;">' +
+    var html  =
+        '<table style="width:100%;border-collapse:collapse;font-size:12px;">' +
         '<thead><tr style="background:#1a73e8;color:#fff;">' +
         '<th style="padding:5px 6px;text-align:left;">項目</th>' +
         '<th style="padding:5px 6px;">最新值</th>' +
         '<th style="padding:5px 6px;">平均值</th>' +
         '<th style="padding:5px 6px;">最小值</th>' +
         '<th style="padding:5px 6px;">最大值</th>' +
-        '<th style="padding:5px 6px;">正常範圍</th>' +
+        '<th style="padding:5px 6px;">丙類海域標準</th>' +
         '<th style="padding:5px 6px;">狀態</th>' +
         '</tr></thead><tbody>';
 
     types.forEach(function(t, i) {
         var cfg  = normalRanges[t];
-        var vals = rows.map(r => parseFloat(r[t])).filter(v => !isNaN(v));
+        var vals = rows.map(function(r) { return parseFloat(r[t]); }).filter(function(v) { return !isNaN(v); });
         if (!vals.length) return;
         var latest = vals[vals.length-1];
-        var avg    = (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(2);
-        var min    = Math.min(...vals).toFixed(2);
-        var max    = Math.max(...vals).toFixed(2);
-        var bad    = (latest < cfg.min || latest > cfg.max);
-        var status = bad
-            ? '<span class="badge-bad">⚠️ 異常</span>'
-            : '<span class="badge-ok">✅ 正常</span>';
-        var latestStyle = bad ? 'color:#ea4335;font-weight:bold;' : 'color:#34a853;font-weight:bold;';
+        var avg    = (vals.reduce(function(a,b){return a+b;},0)/vals.length).toFixed(2);
+        var minV   = Math.min.apply(null, vals).toFixed(2);
+        var maxV   = Math.max.apply(null, vals).toFixed(2);
+        var bad    = isAbnormal(t, latest);
+
+        // 標準範圍欄：無標準顯示 -
+        var stdCell = cfg.noStd ? '-' :
+            (cfg.min !== null && cfg.max !== null ? cfg.min + '~' + cfg.max + cfg.unit :
+             cfg.min !== null ? '≥ ' + cfg.min + cfg.unit :
+             cfg.max !== null ? '≤ ' + cfg.max + cfg.unit : '-');
+
+        // 狀態欄：無標準顯示 -
+        var status = cfg.noStd ? '-' :
+            (bad ? '<span class="badge-bad">⚠️ 異常</span>' : '<span class="badge-ok">✅ 正常</span>');
+
+        var latestStyle = (!cfg.noStd && bad) ? 'color:#ea4335;font-weight:bold;' :
+                          (!cfg.noStd)        ? 'color:#34a853;font-weight:bold;' : '';
         var bg = i%2===0 ? '#f8f9fa' : '#fff';
+
         html +=
             '<tr style="background:' + bg + ';">' +
             '<td style="padding:5px 6px;font-weight:bold;">' + cfg.label + '</td>' +
             '<td style="padding:5px 6px;text-align:center;' + latestStyle + '">' + latest + cfg.unit + '</td>' +
-            '<td style="padding:5px 6px;text-align:center;">' + avg    + cfg.unit + '</td>' +
-            '<td style="padding:5px 6px;text-align:center;">' + min    + cfg.unit + '</td>' +
-            '<td style="padding:5px 6px;text-align:center;">' + max    + cfg.unit + '</td>' +
-            '<td style="padding:5px 6px;text-align:center;font-size:11px;">' + cfg.min + '~' + cfg.max + cfg.unit + '</td>' +
+            '<td style="padding:5px 6px;text-align:center;">' + avg  + cfg.unit + '</td>' +
+            '<td style="padding:5px 6px;text-align:center;">' + minV + cfg.unit + '</td>' +
+            '<td style="padding:5px 6px;text-align:center;">' + maxV + cfg.unit + '</td>' +
+            '<td style="padding:5px 6px;text-align:center;font-size:11px;">' + stdCell + '</td>' +
             '<td style="padding:5px 6px;text-align:center;">' + status + '</td>' +
             '</tr>';
     });
@@ -603,21 +705,24 @@ function buildStatsTable(rows) {
     return div;
 }
 
-// ----- 異常記錄表 -----
+// ----- 異常記錄表（跳過無標準項目）-----
 function buildAnomalyTable(rows) {
-    var types     = ['ph','do','EC','salinity'];
+    var types     = ['ph','do'];   // EC、salinity 無標準，不列異常
     var anomalies = [];
 
     rows.forEach(function(r) {
         types.forEach(function(t) {
             var v   = parseFloat(r[t]);
             var cfg = normalRanges[t];
-            if (!isNaN(v) && (v < cfg.min || v > cfg.max)) {
+            if (isAbnormal(t, v)) {
+                var stdStr = cfg.min !== null && cfg.max !== null ? cfg.min+'~'+cfg.max+cfg.unit :
+                             cfg.min !== null ? '≥ '+cfg.min+cfg.unit :
+                             cfg.max !== null ? '≤ '+cfg.max+cfg.unit : '';
                 anomalies.push({
                     time:  r.year + "/" + r.month,
                     item:  cfg.label,
                     value: v + cfg.unit,
-                    range: cfg.min + "~" + cfg.max + cfg.unit
+                    range: stdStr
                 });
             }
         });
@@ -625,24 +730,25 @@ function buildAnomalyTable(rows) {
 
     if (!anomalies.length) {
         var p = document.createElement('p');
-        p.style.color   = '#34a853';
-        p.textContent   = '✅ 監測期間內無異常記錄。';
+        p.style.color = '#34a853';
+        p.textContent = '✅ 監測期間內無異常記錄。';
         return p;
     }
 
-    var html = '<table style="width:100%;border-collapse:collapse;font-size:12px;">' +
+    var html =
+        '<table style="width:100%;border-collapse:collapse;font-size:12px;">' +
         '<thead><tr style="background:#ea4335;color:#fff;">' +
         '<th style="padding:5px 6px;">時間</th>' +
         '<th style="padding:5px 6px;">項目</th>' +
         '<th style="padding:5px 6px;">實測值</th>' +
-        '<th style="padding:5px 6px;">正常範圍</th>' +
+        '<th style="padding:5px 6px;">丙類海域標準</th>' +
         '</tr></thead><tbody>';
 
     anomalies.forEach(function(a, i) {
         var bg = i%2===0 ? '#fff3f3' : '#fff';
         html +=
             '<tr style="background:' + bg + ';">' +
-            '<td style="padding:5px 6px;text-align:center;">' + a.time + '</td>' +
+            '<td style="padding:5px 6px;text-align:center;">' + a.time  + '</td>' +
             '<td style="padding:5px 6px;">' + a.item + '</td>' +
             '<td style="padding:5px 6px;text-align:center;color:#ea4335;font-weight:bold;">' + a.value + '</td>' +
             '<td style="padding:5px 6px;text-align:center;">' + a.range + '</td>' +
@@ -655,14 +761,19 @@ function buildAnomalyTable(rows) {
     return div;
 }
 
-// ----- 各漁港總覽表 -----
+// ----- 各漁港最新水質總覽（優先當月，否則取最後一筆）-----
 function buildSummaryTable(ports) {
     var types = ['ph','do','EC','salinity'];
-    var html  =
-        '<h3>📋 各漁港最新水質總覽</h3>' +
+    var now   = new Date();
+    var curY  = now.getFullYear();
+    var curM  = now.getMonth() + 1;
+
+    var html =
+        '<h3>📋 各漁港最新水質總覽（' + curY + ' 年 ' + curM + ' 月）</h3>' +
         '<table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:20px;">' +
         '<thead><tr style="background:#1a73e8;color:#fff;">' +
         '<th style="padding:5px 6px;text-align:left;">漁港</th>' +
+        '<th style="padding:5px 6px;">資料月份</th>' +
         '<th style="padding:5px 6px;">pH</th>' +
         '<th style="padding:5px 6px;">DO (mg/L)</th>' +
         '<th style="padding:5px 6px;">EC (mS/cm)</th>' +
@@ -671,26 +782,31 @@ function buildSummaryTable(ports) {
         '</tr></thead><tbody>';
 
     ports.forEach(function(port, i) {
-        var rows = getPortData(port);
-        if (!rows.length) return;
-        var last       = rows[rows.length-1];
+        var last = getLatestRow(port);
+        if (!last) return;
+
+        var dataMonth = last.year + "/" + last.month;
         var hasAnomaly = false;
-        var cells      = types.map(function(t) {
+
+        var cells = types.map(function(t) {
             var v   = parseFloat(last[t]);
             var cfg = normalRanges[t];
             if (isNaN(v)) return '<td style="padding:5px 6px;text-align:center;">-</td>';
-            var bad   = (v < cfg.min || v > cfg.max);
+            var bad = isAbnormal(t, v);
             if (bad) hasAnomaly = true;
             var style = bad ? 'color:#ea4335;font-weight:bold;' : '';
             return '<td style="padding:5px 6px;text-align:center;' + style + '">' + v + '</td>';
         });
+
         var badge = hasAnomaly
             ? '<span class="badge-bad">⚠️ 異常</span>'
             : '<span class="badge-ok">✅ 正常</span>';
         var bg = i%2===0 ? '#f8f9fa' : '#fff';
+
         html +=
             '<tr style="background:' + bg + ';">' +
             '<td style="padding:5px 6px;font-weight:bold;">' + port + '</td>' +
+            '<td style="padding:5px 6px;text-align:center;color:#555;">' + dataMonth + '</td>' +
             cells.join('') +
             '<td style="padding:5px 6px;text-align:center;">' + badge + '</td>' +
             '</tr>';
@@ -700,24 +816,6 @@ function buildSummaryTable(ports) {
     var div = document.createElement('div');
     div.innerHTML = html;
     return div;
-}
-
-// ===================================================
-// 共用工具
-// ===================================================
-function getYAxisConfig(dataType, smallFont) {
-    var cfgs = {
-        ph:       { min:5,  max:10, stepSize:0.5 },
-        do:       { min:0,  max:10, stepSize:1   },
-        EC:       { min:30, max:55, stepSize:5   },
-        salinity: { min:0,  max:50, stepSize:5   }
-    };
-    var c        = cfgs[dataType];
-    var fontSize = smallFont ? 9 : 12;
-    return {
-        min: c.min, max: c.max,
-        ticks: { stepSize: c.stepSize, font:{ size: fontSize } }
-    };
 }
 </script>
 </body>
