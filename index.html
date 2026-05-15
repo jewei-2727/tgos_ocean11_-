@@ -7,7 +7,7 @@
 <script type="text/javascript"
     src="https://api.tgos.tw/TGOS_API/tgos?ver=2&AppID=x+JLVSx85Lk=&APIKey=in8W74q0ogpcfW/STwicK8D5QwCdddJf05/7nb+OtDh8R99YN3T0LurV4xato3TpL/fOfylvJ9Wv/khZEsXEWxsBmg+GEj4AuokiNXCh14Rei21U5GtJpIkO++Mq3AguFK/ISDEWn4hMzqgrkxNe1Q=="
     charset="utf-8"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <style>
@@ -402,8 +402,6 @@ function buildThresholdDatasetsSmall(cfg, values, ptColors, n) {
 }
 
 // tooltip / legend 過濾閾值線
-// legend filter: item.text 是 dataset label
-var legendFilter = { filter: function(item) { return item.text !== '__threshold__'; } };
 // tooltip filter: item.dataset.label
 function tooltipFilter(item) { return item.dataset.label !== '__threshold__'; }
 
@@ -440,7 +438,7 @@ function updateMainChart(portName, dataType) {
             scales:{ y: getYAxisConfig(dataType) },
             interaction:{ mode:'index', intersect:false },
             plugins:{
-                legend:{ labels: legendFilter },
+                legend:{ display:true, labels:{ filter: function(item){ return item.text !== '__threshold__'; } } },
                 tooltip:{
                     filter: tooltipFilter,
                     callbacks:{
@@ -521,7 +519,7 @@ function updateCompareChart() {
             scales:{ y: getYAxisConfig(dataType) },
             interaction:{ mode:'index', intersect:false },
             plugins:{
-                legend:{ position:'top', labels: legendFilter },
+                legend:{ display:true, position:'top', labels:{ filter: function(item){ return item.text !== '__threshold__'; } } },
                 tooltip:{ filter: tooltipFilter }
             }
         }
