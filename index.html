@@ -402,7 +402,10 @@ function buildThresholdDatasetsSmall(cfg, values, ptColors, n) {
 }
 
 // tooltip / legend 過濾閾值線
-var thresholdFilter = { filter: function(item) { return item.dataset.label !== '__threshold__'; } };
+// legend filter: item.text 是 dataset label
+var legendFilter = { filter: function(item) { return item.text !== '__threshold__'; } };
+// tooltip filter: item.dataset.label
+function tooltipFilter(item) { return item.dataset.label !== '__threshold__'; }
 
 // ===================================================
 // Tab 1：單一港口
@@ -437,9 +440,9 @@ function updateMainChart(portName, dataType) {
             scales:{ y: getYAxisConfig(dataType) },
             interaction:{ mode:'index', intersect:false },
             plugins:{
-                legend:{ labels: thresholdFilter },
+                legend:{ labels: legendFilter },
                 tooltip:{
-                    filter: thresholdFilter.filter,
+                    filter: tooltipFilter,
                     callbacks:{
                         afterBody: function(ctx) {
                             var row    = rows[ctx[0].dataIndex];
@@ -518,8 +521,8 @@ function updateCompareChart() {
             scales:{ y: getYAxisConfig(dataType) },
             interaction:{ mode:'index', intersect:false },
             plugins:{
-                legend:{ position:'top', labels: thresholdFilter },
-                tooltip:{ filter: thresholdFilter.filter }
+                legend:{ position:'top', labels: legendFilter },
+                tooltip:{ filter: tooltipFilter }
             }
         }
     });
@@ -576,7 +579,7 @@ function generateReport() {
                     },
                     plugins:{
                         legend:{ display:false },
-                        tooltip:{ filter: thresholdFilter.filter, enabled:true }
+                        tooltip:{ filter: tooltipFilter, enabled:true }
                     }
                 }
             });
