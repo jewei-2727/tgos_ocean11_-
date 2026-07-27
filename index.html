@@ -60,11 +60,10 @@ label  { font-weight:bold; display:block; font-size:13px; }
 }
 .report-chart-box {
     border:1px solid #ddd; border-radius:6px;
-    padding:10px 8px 4px 8px; background:#fafafa;
-    overflow:hidden; /* 防止內容溢出外框 */
+    padding:8px; background:#fafafa;
 }
 .report-chart-box h5 { margin:0 0 4px 0; font-size:12px; color:#333; text-align:center; }
-.report-chart-container { position:relative; height:160px; width:100%; }
+.report-chart-container { position:relative; height:165px; width:100%; }
 
 @media print {
     body { display:block; overflow:visible; }
@@ -190,6 +189,7 @@ var portsCoords = {
 var weatherIcons = { "晴":"☀️", "陰":"☁️", "雨":"🌧️" };
 
 // 丙類海域標準
+// noStd:true = 無標準值（鹽度、EC），不判斷異常、不畫紅線
 var normalRanges = {
     ph:       { min:7.0, max:8.5,  unit:"",       label:"pH 值",       color:"#f4a300", noStd:false },
     do:       { min:2.0, max:null, unit:" mg/L",  label:"溶氧量 (DO)", color:"#1a73e8", noStd:false },
@@ -295,6 +295,7 @@ function getPortData(portName) {
         .sort(function(a,b) { return (a.year*100+parseInt(a.month)) - (b.year*100+parseInt(b.month)); });
 }
 
+// 取最新月份資料（優先找當月，否則取最後一筆）
 function getLatestRow(portName) {
     var rows = getPortData(portName);
     if (!rows.length) return null;
@@ -307,6 +308,7 @@ function getLatestRow(portName) {
     return found || rows[rows.length - 1];
 }
 
+// 判斷某值是否異常
 function isAbnormal(type, value) {
     var cfg = normalRanges[type];
     if (cfg.noStd || isNaN(value)) return false;
@@ -315,6 +317,7 @@ function isAbnormal(type, value) {
     return false;
 }
 
+// Y 軸設定
 function getYAxisConfig(dataType, smallFont) {
     var cfgs = {
         ph:       { min:5,  max:10, stepSize:0.5 },
@@ -330,6 +333,7 @@ function getYAxisConfig(dataType, smallFont) {
     };
 }
 
+// 建立 datasets：資料線 + 紅色虛線閾值
 function buildThresholdDatasets(cfg, values, ptColors, n) {
     var datasets = [{
         label: cfg.label,
@@ -361,6 +365,7 @@ function buildThresholdDatasets(cfg, values, ptColors, n) {
     return datasets;
 }
 
+// 同樣適用於報告小圖（pointRadius 縮小）
 function buildThresholdDatasetsSmall(cfg, values, ptColors, n) {
     var datasets = [{
         label: cfg.label,
@@ -541,7 +546,7 @@ function generateReport() {
         ports.forEach(function(p) { container.appendChild(buildSingleReport(p, true, chartTasks)); });
     }
 
-    // DOM 插入後渲染圖表（徹底解決 X 軸標籤壓框問題）
+    // DOM 插入後統一渲染圖表（修正 X 軸超界問題）
     requestAnimationFrame(function() {
         chartTasks.forEach(function(task) {
             var cfg      = normalRanges[task.type];
@@ -559,10 +564,10 @@ function generateReport() {
                     maintainAspectRatio:false,
                     layout: {
                         padding: {
-                            bottom: 25, // 👈 大幅擴充底部內距，防止底部壓框
+                            bottom: 15, // 👈 增加底部留白，完全解決 X 軸日期標籤超出邊框的問題
                             top: 5,
                             left: 5,
-                            right: 15
+                            right: 10
                         }
                     },
                     scales:{
@@ -572,11 +577,11 @@ function generateReport() {
                             },
                             ticks:{ 
                                 font:{ size: 9 }, 
-                                maxRotation: 0,  // 👈 強制水平顯示（0度），徹底避免傾斜文字延伸超出邊框
-                                minRotation: 0,  
+                                maxRotation: 30,  // 微調傾斜角度
+                                minRotation: 0,   // 若空間足夠則自動水平顯示
                                 autoSkip: true, 
-                                maxTicksLimit: 5, // 👈 限制最多顯示 5 個時間點，保持水平不重疊
-                                padding: 6
+                                maxTicksLimit: 6,
+                                padding: 2
                             } 
                         },
                         y: getYAxisConfig(task.type, true)
