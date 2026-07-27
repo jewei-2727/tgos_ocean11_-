@@ -1114,61 +1114,53 @@ function generateReport() {
 
     // DOM 插入後統一渲染圖表
 
-    requestAnimationFrame(function() {
+requestAnimationFrame(function() {
+    chartTasks.forEach(function(task) {
+        var cfg      = normalRanges[task.type];
+        var values   = task.rows.map(function(r) { return parseFloat(r[task.type]); });
+        var labels   = task.rows.map(function(r) { return r.year + "/" + r.month; });
+        var ptColors = values.map(function(v) { return isAbnormal(task.type, v) ? '#ea4335' : cfg.color; });
 
-        chartTasks.forEach(function(task) {
-
-            var cfg      = normalRanges[task.type];
-
-            var values   = task.rows.map(function(r) { return parseFloat(r[task.type]); });
-
-            var labels   = task.rows.map(function(r) { return r.year + "/" + r.month; });
-
-            var ptColors = values.map(function(v) { return isAbnormal(task.type, v) ? '#ea4335' : cfg.color; });
-
-
-
-            var c = new Chart(task.canvas.getContext('2d'), {
-
-                type:'line',
-
-                data:{
-
-                    labels: labels,
-
-                    datasets: buildThresholdDatasetsSmall(cfg, values, ptColors, labels.length)
-
-                },
-
-                options:{
-
-                    maintainAspectRatio:false,
-
-                    scales:{
-
-                        x:{ ticks:{ font:{ size:9 }, maxRotation:45, minRotation:45, autoSkip:true, maxTicksLimit:6 } },
-
-                        y: getYAxisConfig(task.type, true)
-
-                    },
-
-                    plugins:{
-
-                        legend:{ display:false },
-
-                        tooltip:{ filter: tooltipFilter, enabled:true }
-
+        var c = new Chart(task.canvas.getContext('2d'), {
+            type:'line',
+            data:{
+                labels: labels,
+                datasets: buildThresholdDatasetsSmall(cfg, values, ptColors, labels.length)
+            },
+            options:{
+                maintainAspectRatio:false,
+                layout: {
+                    padding: {
+                        bottom: 10, // 👈 底部留出空間，讓 X 軸旋轉後的標籤不會壓到外框
+                        left: 5,
+                        right: 10
                     }
-
+                },
+                scales:{
+                    x:{ 
+                        grid: {
+                            drawOnChartArea: true // 保持網格線正常顯示
+                        },
+                        ticks:{ 
+                            font:{ size: 9 }, 
+                            maxRotation: 30,  // 👈 將傾斜角度從 45 度微調為 30 度，減少垂直佔用空間
+                            minRotation: 30,
+                            autoSkip: true, 
+                            maxTicksLimit: 6,
+                            padding: 4        // 👈 設定文字與軸線間距
+                        } 
+                    },
+                    y: getYAxisConfig(task.type, true)
+                },
+                plugins:{
+                    legend:{ display:false },
+                    tooltip:{ filter: tooltipFilter, enabled:true }
                 }
-
-            });
-
-            reportCharts.push(c);
-
+            }
         });
-
+        reportCharts.push(c);
     });
+});
 
 }
 
